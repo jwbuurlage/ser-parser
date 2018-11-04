@@ -1,7 +1,7 @@
 [package]
-name = "parser"
+name = "SerParser"
 version = "0.1.0"
-authors = ["jw"]
+authors = ["Jan-Willem Buurlage"]
 
 [dependencies]
 nom = ">=0.4.1"
