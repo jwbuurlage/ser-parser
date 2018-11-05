@@ -1,7 +1,8 @@
 [package]
-name = "SerParser"
+name = "ser_parser"
 version = "0.1.0"
 authors = ["Jan-Willem Buurlage"]
 
 [dependencies]
 nom = ">=0.4.1"
+hex = ">= 0.3.0"
