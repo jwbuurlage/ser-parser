@@ -6,3 +6,4 @@ authors = ["Jan-Willem Buurlage"]
 [dependencies]
 nom = ">=0.4.1"
 hex = ">= 0.3.0"
+image = ">= 0.20"
