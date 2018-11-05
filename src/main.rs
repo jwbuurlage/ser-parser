@@ -5,6 +5,7 @@ extern crate hex;
 
 use nom::{le_f64, le_i16, le_i32, le_i64};
 use std::fs;
+use std::io::SeekFrom;
 
 #[derive(Debug, PartialEq)]
 pub enum ArrayDim {
@@ -38,8 +39,11 @@ pub struct Ser<'a> {
     pub valid_element_count: i32,
     pub array_offset: i64,
     pub dimension_arrays: Vec<DimArray<'a>>,
+    pub data_offset: Vec<i64>,
+    pub tag_offset: Vec<i64>,
 }
 
+/// Parse if the data is time only or time and 2D
 named!(
     tag_type<TagType>,
     alt!(
@@ -48,6 +52,7 @@ named!(
         )
 );
 
+/// Parse if the array dimensions are 1D or 2D
 named!(
     array_dim<ArrayDim>,
     alt!(
@@ -56,6 +61,7 @@ named!(
     )
 );
 
+/// Parse information of a dimension
 named!(
     dim_array<DimArray>,
     do_parse!(
@@ -78,6 +84,13 @@ named!(
     )
 );
 
+// FIXME
+/// Parse an offset depending on version number
+named_args!(parse_offset(version: i16)<i64>,
+    do_parse!( x: le_i64 >> (x) )
+);
+
+/// Parse a FEI .ser file
 named!(ser_reader<&[u8], Ser>,
        do_parse!(
             tag!(&hex::decode("4949").unwrap()[..]) >>
@@ -93,8 +106,17 @@ named!(ser_reader<&[u8], Ser>,
             ) >>
             number_dimensions: le_i32 >>
             dimension_arrays: count!(dim_array, number_dimensions as usize) >>
+            data_offset: count!(alt!(
+                cond_reduce!(series_version >= 544, le_i64) |
+                map!(le_i32, |y| y as i64)
+            ), total_element_count as usize) >>
+            tag_offset: count!(alt!(
+                cond_reduce!(series_version >= 544, le_i64) |
+                map!(le_i32, |y| y as i64)
+            ), total_element_count as usize) >>
             (Ser { series_id, series_version, data_type, tag_type,
-                   total_element_count, valid_element_count, array_offset, dimension_arrays })
+                   total_element_count, valid_element_count, array_offset,
+                   dimension_arrays, data_offset, tag_offset })
        ));
 
 #[test]
@@ -102,6 +124,9 @@ fn test_ser_parser() {
     let file = fs::read("test_data/-3_1.ser").expect("failed to open .ser file");
 
     let result = ser_reader(&file).expect("could not parse .ser file");
+
+    // FIXME need to seek in file..
+
     println!("{:#?}", result.1)
 
     // assert_eq!(
