@@ -117,7 +117,7 @@ named!(
         )
 );
 
-/// Parse if the array dimensions are 1D or 2D
+/// parse if the array dimensions are 1D or 2D
 named!(
     array_dim<ArrayDim>,
     alt!(
@@ -310,6 +310,7 @@ fn main() {
     .expect("could not parse offsets");
     println!("offsets: {:#?}", offsets.1);
 
+    // FIXME for each tag
     let tags = ser_data_tag_parser(
         &file[(offsets.1.tag_offset[0] as usize)..],
         result.1.tag_type,
@@ -317,24 +318,31 @@ fn main() {
     .expect("could not parse tag");
     println!("tags: {:#?}", tags.1);
 
+    // FIXME for each offset
     let data = ser_data_parser(
         &file[(offsets.1.data_offset[0] as usize)..],
         result.1.array_dim,
     )
     .expect("could not parse data");
+    // FIXME what about valid elements
 
     match data.1 {
         SerData::TwoDim(the_data) => match the_data.data {
             SerRawData::DataU16(raw) => {
-                let raw_as_u8: Vec<u8> = raw.iter().map(|x| *x as u8).collect();
+                let max: f64 = *raw.iter().max().unwrap() as f64;
+                let raw_as_u8: Vec<u8> = raw
+                    .iter()
+                    .map(|x| (((*x as f64) / max) * 255.0) as u8)
+                    .collect();
                 image::save_buffer(
                     "test.png",
                     &raw_as_u8[..],
                     the_data.array_size_y as u32,
                     the_data.array_size_x as u32,
                     image::Gray(8),
-                ).unwrap();
-            },
+                )
+                .unwrap();
+            }
             _ => {}
         },
         _ => {}
