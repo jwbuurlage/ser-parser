@@ -16,10 +16,25 @@ cd ser-parser
 cargo build
 cargo run
 ```
+4. Build and install the Python library
+```bash
+cargo install pyo3-pack
+pyo3-pack build
+conda activate somecondaenvironment
+pip install target/wheels/the_right_wheel.whl
+```
+5. Use from Python;
+```python
+import ser_parser
+
+shape, data = ser_parser.parse("ser_file")
+
+print(shape, data)
+```
 
 ## Roadmap
 
-- [ ] Python bindings
+- [ ] Expose parser through python bindings
 
 ## Links
 
