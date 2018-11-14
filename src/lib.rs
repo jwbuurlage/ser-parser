@@ -4,7 +4,7 @@
 extern crate nom;
 
 #[macro_use]
-extern crate pyo3;
+extern crate cpython;
 
 pub mod data;
 pub mod parsers;
