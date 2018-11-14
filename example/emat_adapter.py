@@ -26,21 +26,26 @@ files = [(0, "")] * count
 angles = np.zeros(count)
 
 
-def to_int(str):
-    return int(str[:-2])
-
+def to_float(str):
+    return float(str[:-2])
 
 i = 0
 for filename in os.listdir(path):
     if filename.endswith(".ser"):
         full_path = os.path.join(path, filename)
-        angles[i] = to_int(os.path.splitext(filename)[0])
+        angles[i] = to_float(os.path.splitext(filename)[0])
         files[i] = (angles[i], full_path)
         i += 1
 
 (m, n), _ = ser_parser.parser(files[0][1])
 
+files = sorted(files)
+angles = np.sort(angles)
+print(files)
+
 angles = angles * (math.pi / 180.0)
+
+print(angles)
 
 # PACKET 1: object volume specification
 print("Sending object volume")
