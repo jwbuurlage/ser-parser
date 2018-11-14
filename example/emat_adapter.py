@@ -37,7 +37,8 @@ for filename in os.listdir(path):
         files[i] = (angles[i], full_path)
         i += 1
 
-(m, n), _ = ser_parser.parser(files[0][1])
+(m, n), data = ser_parser.parser(files[0][1])
+low, high = np.min(data), np.max(data)
 
 files = sorted(files)
 angles = np.sort(angles)
@@ -57,19 +58,12 @@ print("Sending acquisition geometry")
 par_beam = tomop.parallel_beam_geometry_packet(0, m, n, count, angles)
 pub.send(par_beam)
 
+# PACKET 3: scan settings
+print("Sending scan data")
+pub.send(tomop.scan_settings_packet(0, 0, 0, True))
 
-# PACKET 3..: Projections
-# A) send (fake) dark
-print("Sending dark")
-fake_data = np.ascontiguousarray(np.zeros([m, n]).flatten())
-pub.send(tomop.projection_packet(0, 0, [m, n], fake_data))
-# B) send (fake) flat
-print("Sending flat")
-fake_flat_data = np.ascontiguousarray(np.ones([m, n]).flatten())
-pub.send(tomop.projection_packet(1, 0, [m, n], fake_flat_data))
-# C) send projections
-# FIXME dont neg log?
+# PACKET 4..: Projections
 for idx, (angle, filename) in enumerate(files):
     print("Sending projection: ", idx)
     shape, data = ser_parser.parser(filename)
-    pub.send(tomop.projection_packet(2, idx, [m, n], data))
+    pub.send(tomop.projection_packet(2, idx, [m, n], (data - low) / (high - low)))
