@@ -5,16 +5,11 @@ use super::parsers::*;
 use std::convert::Into;
 use std::fs;
 
-fn convert_to_float<T: Clone>(raw: Vec<T>) -> Vec<f32>
+fn convert_to_float<T: Copy>(raw: Vec<T>) -> Vec<f32>
 where
     f32: std::convert::From<T>,
 {
-    let mut result = vec![];
-    for x in raw {
-        result.push(f32::from(x))
-    }
-
-    result
+    return raw.into_iter().map(|x| f32::from(x)).collect();
 }
 
 fn parse(_: Python, filename: String) -> PyResult<((i32, i32), Vec<f32>)> {
