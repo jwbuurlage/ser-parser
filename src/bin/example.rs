@@ -7,7 +7,7 @@ use ser_parser::parsers::*;
 use std::fs;
 
 fn main() {
-    let file = fs::read("test_data/-3_1.ser").expect("failed to open .ser file");
+    let file = fs::read("test_data/tem.ser").expect("failed to open .ser file");
 
     let result = ser_header_parser(&file).expect("could not parse .ser file");
     println!("header: {:#?}", result.1);

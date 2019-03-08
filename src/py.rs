@@ -12,6 +12,11 @@ where
     return raw.into_iter().map(|x| f32::from(x)).collect();
 }
 
+fn convert_unsafe(raw: Vec<i32>) -> Vec<f32>
+{
+    return raw.into_iter().map(|x| x as f32).collect();
+}
+
 fn parse(_: Python, filename: String) -> PyResult<((i32, i32), Vec<f32>)> {
     let file = fs::read(filename).expect("failed to open .ser file");
 
@@ -49,6 +54,7 @@ fn parse(_: Python, filename: String) -> PyResult<((i32, i32), Vec<f32>)> {
                 DataI8(raw) => Some(convert_to_float(raw)),
                 DataI16(raw) => Some(convert_to_float(raw)),
                 DataF32(raw) => Some(convert_to_float(raw)),
+                DataI32(raw) => Some(convert_unsafe(raw)),
                 // DataI32(raw) => Some(convert_to_float(raw)), // \
                 // DataU32(raw) => Some(convert_to_float(raw)), //  }~~~~> need other way
                 // DataF64(raw) => Some(convert_to_float(raw)), // /
