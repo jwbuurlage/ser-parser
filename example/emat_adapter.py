@@ -16,7 +16,9 @@ parser.add_argument(
 parser.add_argument(
     '--port', type=int, default=5558, help='the projection server port')
 parser.add_argument(
-    '--prerecorded',default=False, help='use prerecorded set')
+    '--prerecorded', action='store_true', help='use prerecorded set')
+parser.add_argument(
+    '--linearize', action='store_true', help='whether data is linear')
 parser.add_argument(
     '--angles', type=int, nargs='+', help='list of angles')
 parser.add_argument(
@@ -97,8 +99,8 @@ par_beam = tomop.parallel_beam_geometry_packet(0, m, n, count, angles)
 pub.send(par_beam)
 
 # PACKET 3: scan settings
-print("Sending scan data")
-pub.send(tomop.scan_settings_packet(0, 0, 0, True))
+print("Sending scan data (linear: ", not args.linearize, ")")
+pub.send(tomop.scan_settings_packet(0, 0, 0, not args.linearize))
 
 # PACKET 4..: Projections
 while not os.path.isfile(files[0][1]):
@@ -112,23 +114,28 @@ prev = np.reshape(first_proj, [m, n])
 prev_shift = np.round(ndimage.measurements.center_of_mass(prev)).astype(
     np.int) - np.array([m // 2 - 1, n // 2 - 1])
 
+def convert(af):
+    return (af[1][0], af[1][1], af[0])
+
+files = list(map(convert, enumerate(files)))
+
 while len(files) > 0:
     file_found = ""
     angle_found = 0
     idx_found = -1
     while True:
-        for idx, (angle, filename) in enumerate(files):
+        for (angle, filename, proj_idx) in files:
             if os.path.isfile(filename):
                 file_found = filename
                 angle_found = angle
-                idx_found = idx
+                idx_found = proj_idx
                 break
             time.sleep(0.01)
         if (idx_found >= 0):
             break
         time.sleep(1.0)
     print((angle_found, file_found))
-    files.remove((angle_found, file_found))
+    files.remove((angle_found, file_found, idx_found))
 
     print("Sending projection: ", idx_found)
     shape, data = ser_parser.parser(file_found)
