@@ -6,8 +6,11 @@ import numpy as np
 import tomop
 import argparse
 #import matlab.engine
+#import matplotlib.pyplot as plt
 import scipy.signal as ss
 from scipy import ndimage
+import skimage as ski
+
 
 parser = argparse.ArgumentParser(description='Push EMAT data to SliceRecon.')
 parser.add_argument('path', metavar='path', help='path to the data')
@@ -109,10 +112,18 @@ while not os.path.isfile(files[0][1]):
 time.sleep(1.0)
 
 shape, first_proj = ser_parser.parser(files[0][1])
-
 prev = np.reshape(first_proj, [m, n])
-prev_shift = np.round(ndimage.measurements.center_of_mass(prev)).astype(
-    np.int) - np.array([m // 2 - 1, n // 2 - 1])
+prev = np.transpose(prev, axes=[1, 0])
+
+def center(xs):
+    val = ski.filters.threshold_otsu(xs)
+    ys = xs.copy()
+    ys[ys < val] = 0.0
+    x, y = ndimage.measurements.center_of_mass(ys)
+    shift = np.array([m // 2 - x, n // 2 - y]).round()
+    return np.roll(xs, np.array(shift, dtype=np.int32), (0, 1))
+
+prev = center(prev)
 
 def convert(af):
     return (af[1][0], af[1][1], af[0])
@@ -140,13 +151,15 @@ while len(files) > 0:
     print("Sending projection: ", idx_found)
     shape, data = ser_parser.parser(file_found)
     xs = np.reshape(data, shape)
+    xs = np.transpose(xs, axes=[1, 0])
+    xs = center(xs)
+
     shift = align(xs, prev)
     print(shift)
-    shifted_xs = np.roll(xs, -(prev_shift + shift), (0, 1))
+    shifted_xs = np.roll(xs, -shift, (0, 1))
 
     pub.send(
         tomop.projection_packet(2, idx_found, [m, n],
                                 np.ascontiguousarray(shifted_xs.ravel())))
 
-    prev = xs
-    prev_shift = prev_shift + shift
+    prev = shifted_xs
