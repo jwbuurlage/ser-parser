@@ -1,0 +1,29 @@
+package:
+  name: ser_parser
+  version: 1.0.0
+
+source:
+  git_url: https://github.com/jwbuurlage/ser-parser
+  git_tag: master
+
+build:
+  number: 0
+
+test:
+  imports:
+    - tomop
+
+requirements:
+  build:
+    - rust
+    - maturin
+  host:
+    - rust
+    - maturin
+  run:
+    - python
+
+about:
+  home: https://github.com/jwbuurlage/ser-parser
+  license: LICENSE.md
+  summary: 'Parser for SER files'
