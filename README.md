@@ -6,11 +6,11 @@ Scientific (formerly FEI) acquisition software.
 ## Depencies
 
 - _Rust_ dependencies are handled through Cargo
-- For the example [TomoPackets](https://www.github.com/cicwi/TomoPackets)
-  adapter, we assume a specific naming scheme. For this the =tomop= Python
+- For the example [RECAST3D](https://www.github.com/cicwi/RECAST3D)
+  adapter, we assume a specific naming scheme. For this the =tomopackets= Python
   library should be installed.
 
-## Installing
+## Installing (manual)
 
 The parser is written in Rust, and may use features from the _nightly_ toolchain.
 
@@ -25,9 +25,8 @@ cargo run
 ```
 4. Build and install the Python library
 ```bash
-# cargo install pyo3-pack
-# ... need to instead install jwbuurlage/pyo3-pack fork
-pyo3-pack build
+cargo install maturin
+maturin build
 conda activate somecondaenvironment
 pip install target/wheels/the_right_wheel.whl
 ```

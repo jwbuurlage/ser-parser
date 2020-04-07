@@ -2,7 +2,6 @@ use cpython::{PyResult, Python};
 
 use super::data::*;
 use super::parsers::*;
-use std::convert::Into;
 use std::fs;
 
 fn convert_to_float<T: Copy>(raw: Vec<T>) -> Vec<f32>
@@ -30,7 +29,7 @@ fn parse(_: Python, filename: String) -> PyResult<((i32, i32), Vec<f32>)> {
     .expect("could not parse offsets");
 
     // FIXME for each tag
-    let tags = ser_data_tag_parser(
+    let _tags = ser_data_tag_parser(
         &file[(offsets.1.tag_offset[0] as usize)..],
         result.1.tag_type,
     )

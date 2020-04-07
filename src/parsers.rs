@@ -4,7 +4,7 @@ use nom::{le_f32, le_f64, le_i16, le_i32, le_i64, le_i8, le_u16, le_u32, le_u8};
 
 use super::data::*;
 
-/// Parse if the data is time only or time and 2D
+// Parse if the data is time only or time and 2D
 named!(
     tag_type<TagType>,
     alt!(
@@ -13,7 +13,7 @@ named!(
         )
 );
 
-/// parse if the array dimensions are 1D or 2D
+// parse if the array dimensions are 1D or 2D
 named!(
     array_dim<ArrayDim>,
     alt!(
@@ -22,7 +22,7 @@ named!(
     )
 );
 
-/// Parse information of a dimension
+// Parse information of a dimension
 named!(
     dim_array<DimArray>,
     do_parse!(
@@ -45,7 +45,7 @@ named!(
     )
 );
 
-/// Parse an offset depending on version number
+// Parse an offset depending on version number
 named_args!(parse_offset(series_version: i16)<i64>,
     alt!(
         cond_reduce!(series_version >= 544, le_i64) |
@@ -53,7 +53,7 @@ named_args!(parse_offset(series_version: i16)<i64>,
     )
 );
 
-/// Parse a FEI .ser file
+// Parse a FEI .ser file
 named!(
     pub ser_header_parser<SerHeader>,
     do_parse!(
@@ -80,7 +80,7 @@ named!(
     )
 );
 
-/// Parse ser offsets
+// Parse ser offsets
 named_args!(pub ser_offsets_parser(series_version: i16, total_element_count: i32)<SerOffsets>,
        do_parse!(
            data_offset: count!(call!(parse_offset, series_version), total_element_count as usize)
@@ -173,7 +173,7 @@ named!(
     )
 );
 
-/// Parse tags depending on tag type id
+// Parse tags depending on tag type id
 named_args!(pub ser_data_tag_parser(tag_type: TagType)<SerDataTag>,
             alt!(
                 cond_reduce!(tag_type == TagType::Time, map!(ser_data_tag_time_parser, SerDataTag::Time)) |
@@ -181,7 +181,7 @@ named_args!(pub ser_data_tag_parser(tag_type: TagType)<SerDataTag>,
             )
 );
 
-/// Parse tags depending on tag type id
+// Parse tags depending on tag type id
 named_args!(pub ser_data_parser(array_dim: ArrayDim)<SerData>,
             alt!(
                 cond_reduce!(array_dim == ArrayDim::One, map!(ser_data_one_dim_parser, SerData::OneDim)) |

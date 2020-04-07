@@ -8,7 +8,7 @@ name = "ser_parser"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-nom = ">=0.4.1"
+nom = "^4"
 hex = ">= 0.3.0"
-image = ">= 0.20"
+image = "<= 0.23.3"
 cpython = { version = "0.2.1", features = ["extension-module"]}
